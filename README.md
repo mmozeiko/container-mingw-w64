@@ -1,28 +1,32 @@
 # mingw-w64
 
-Builds [mingw-w64][] toolchain in docker for targeting 64-bit Windows from Ubuntu 18.04.
+Builds [mingw-w64][] toolchain in container for targeting 64-bit Windows from Ubuntu 24.04.
 
-This docker image will contain following software built from source:
+Container image will contain following software built from source:
 
 * [pkg-config][] v0.29.2
-* [cmake][] v4.0.3
+* [cmake][] v4.1.2
 * [binutils][] v2.45
 * [mingw-w64][] v13.0.0
 * [gcc][] v15.1.0
-* [nasm][] v2.16.03
+* [nasm][] v3.01
 
 Extra binaries:
 
 * extra Ubuntu packages: `wget`, `patch`, `bison`, `flex`, `yasm`, `make`, `ninja`, `meson`, `zip`.
-* [nvcc][] v12.9.1
+* [nvcc][] v13.0.2
 
 Custom built binaries are installed into `/usr/local` prefix. [pkg-config][] will look for packages in `/mingw` prefix. `nvcc` is available in `/usr/local/cuda/bin` folder.
+
+To build container image run:
+
+    podman build -t mmozeiko/mingw-w64 .
 
 # Using
 
 Execute following to run your shell script, makefile or other build script from current folder:
 
-    docker run --rm -ti -v `pwd`:/mnt mmozeiko/mingw-w64 ./build.sh
+    podman run --rm -ti -v `pwd`:/mnt mmozeiko/mingw-w64 ./build.sh
 
 For autotools builds add following arguments:
 
