@@ -1,16 +1,16 @@
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 WORKDIR /mnt
 
 ENV MINGW=/mingw
 
-ARG PKG_CONFIG_VERSION=0.29.2
-ARG CMAKE_VERSION=4.1.2
-ARG BINUTILS_VERSION=2.45
-ARG MINGW_VERSION=13.0.0
-ARG GCC_VERSION=15.2.0
-ARG NASM_VERSION=3.01
-ARG NVCC_VERSION=13.0.2
+ARG PKGCONF_VERSION=3.0.5
+ARG CMAKE_VERSION=4.4.2
+ARG BINUTILS_VERSION=2.47
+ARG MINGW_VERSION=14.0.0
+ARG GCC_VERSION=16.2.0
+ARG NASM_VERSION=3.02
+ARG NVCC_VERSION=13.3.1
 
 RUN ln -sf /bin/bash /bin/sh
 
@@ -49,27 +49,27 @@ RUN set -ex \
         wget \
         zip \
         git \
+        libarchive-tools \
     \
-    && wget -q https://pkg-config.freedesktop.org/releases/pkg-config-${PKG_CONFIG_VERSION}.tar.gz -O - | tar -xz \
+    && wget -q https://github.com/pkgconf/pkgconf/releases/download/pkgconf-${PKGCONF_VERSION}/pkgconf-${PKGCONF_VERSION}.tar.xz -O - | tar -xJ \
     && wget -q https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz -O - | tar -xz \
     && wget -q https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz -O - | tar -xJ \
-    && wget -q https://sourceforge.net/projects/mingw-w64/files/mingw-w64/mingw-w64-release/mingw-w64-v${MINGW_VERSION}.tar.bz2 -O - | tar -xj \
+    && wget -q https://sourceforge.net/projects/mingw-w64/files/mingw-w64/mingw-w64-release/mingw-w64-v${MINGW_VERSION}.zip -O - | bsdtar -xf- \
     && wget -q https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz -O - | tar -xJ \
     && wget -q https://www.nasm.us/pub/nasm/releasebuilds/${NASM_VERSION}/nasm-${NASM_VERSION}.tar.xz -O - | tar -xJ \
     \
     && mkdir -p ${MINGW}/include ${MINGW}/lib/pkgconfig \
     && chmod 0777 -R /mnt ${MINGW} \
     \
-    && cd pkg-config-${PKG_CONFIG_VERSION} \
+    && cd pkgconf-${PKGCONF_VERSION} \
     && ./configure \
         --prefix=/usr/local \
-        --with-pc-path=${MINGW}/lib/pkgconfig \
-        --with-internal-glib \
+        --with-pkg-config-dir=${MINGW}/lib/pkgconfig \
         --disable-shared \
-        --disable-nls \
     && make -j`nproc` \
     && make install \
     && cd .. \
+    && ln -sf /usr/local/bin/pkgconf /usr/local/bin/pkg-config \
     \
     && cd cmake-${CMAKE_VERSION} \
     && ./configure \
@@ -112,11 +112,13 @@ RUN set -ex \
         --enable-languages=c,c++ \
         --disable-shared \
         --enable-static \
-        --enable-threads=posix \
+        --enable-threads=win32 \
         --with-system-zlib \
+        --enable-tls \
         --enable-libgomp \
         --enable-libatomic \
         --enable-graphite \
+        --enable-libstdcxx-threads \
         --disable-libstdcxx-pch \
         --disable-libstdcxx-debug \
         --disable-multilib \
@@ -159,7 +161,7 @@ RUN set -ex \
     && make install \
     && cd .. \
     \
-    && rm -r pkg-config-${PKG_CONFIG_VERSION} \
+    && rm -r pkgconf-${PKGCONF_VERSION} \
     && rm -r cmake-${CMAKE_VERSION} \
     && rm -r binutils-${BINUTILS_VERSION} \
     && rm -r mingw-w64 mingw-w64-v${MINGW_VERSION} \
@@ -168,8 +170,9 @@ RUN set -ex \
     \
     && apt-get remove --purge -y file gcc g++ zlib1g-dev libssl-dev libgmp-dev libmpfr-dev libmpc-dev libisl-dev \
     \
-    && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/3bf863cc.pub \
-    && echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/ /" > /etc/apt/sources.list.d/cuda.list \
+    && wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2604/x86_64/cuda-keyring_1.1-1_all.deb \
+    && dpkg -i cuda-keyring_1.1-1_all.deb \
+    && rm cuda-keyring_1.1-1_all.deb \
     && apt-get update \
     \
     && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \

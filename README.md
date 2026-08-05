@@ -4,19 +4,19 @@ Builds [mingw-w64][] toolchain in container for targeting 64-bit Windows from Ub
 
 Container image will contain following software built from source:
 
-* [pkg-config][] v0.29.2
-* [cmake][] v4.1.2
-* [binutils][] v2.45
-* [mingw-w64][] v13.0.0
-* [gcc][] v15.1.0
-* [nasm][] v3.01
+* [pkgconf][] v3.0.5
+* [cmake][] v4.4.2
+* [binutils][] v2.47
+* [mingw-w64][] v14.0.0
+* [gcc][] v16.2.0
+* [nasm][] v3.02
 
 Extra binaries:
 
 * extra Ubuntu packages: `wget`, `patch`, `bison`, `flex`, `yasm`, `make`, `ninja`, `meson`, `zip`.
-* [nvcc][] v13.0.2
+* [nvcc][] v13.3.1
 
-Custom built binaries are installed into `/usr/local` prefix. [pkg-config][] will look for packages in `/mingw` prefix. `nvcc` is available in `/usr/local/cuda/bin` folder.
+Custom built binaries are installed into `/usr/local` prefix. [pkgconf][] will look for packages in `/mingw` prefix. `nvcc` is available in `/usr/local/cuda/bin` folder.
 
 To build container image run:
 
@@ -45,7 +45,7 @@ For cmake builds add following arguments:
     -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
     -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
 
-[pkg-config]: https://www.freedesktop.org/wiki/Software/pkg-config/
+[pkgconf]: https://github.com/pkgconf/pkgconf
 [cmake]: https://cmake.org/
 [binutils]: https://www.gnu.org/software/binutils/
 [mingw-w64]: https://mingw-w64.org/
